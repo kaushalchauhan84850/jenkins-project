@@ -7,8 +7,12 @@ pipeline {
                 sh 'python3 scripts/create-db.py'
             }
         }
+        stage('Smoke test'){
+            steps{
+                sh 'python3 scripts/smoke_test.py'
+            }
+        }
     }
-
     post {
         success {
             echo 'Database created successfully ✅'
