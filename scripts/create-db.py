@@ -20,7 +20,7 @@ def create_database():
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS {'DB_NAME'};")
             connection.commit()
 
-            print(f"Database {'DB_NAME'} created successfully or already exists ✅")
+            print(f"Database {'DB_NAME'} created successfully or already exists ✅✅")
 
     except Exception as e:
         print("Error:", e)
