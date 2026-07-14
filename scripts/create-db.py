@@ -2,7 +2,7 @@ import os
 import pymysql
 from dotenv import load_dotenv
 
-load_dotenv("/home/jenkins/.env")
+load_dotenv('/home/jenkins/.env')
 
 
 def create_database():
