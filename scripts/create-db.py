@@ -17,10 +17,10 @@ def create_database():
         with connection.cursor() as cursor:
             db_name = os.getenv("DB_NAME")
 
-            cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{db_name}`;")
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {'DB_NAME'} ;")
             connection.commit()
 
-            print(f"Database '{db_name}' created successfully or already exists ✅")
+            print(f"Database {'DB_NAME'} created successfully or already exists ✅")
 
     except Exception as e:
         print("Error:", e)
