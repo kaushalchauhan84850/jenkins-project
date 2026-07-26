@@ -4,12 +4,15 @@ pipeline {
     }
 
     environment {
-        AWS_REGION = "us-east-1"
+        AWS_REGION   = "us-east-1"
         ECR_REGISTRY = "416394563192.dkr.ecr.us-east-1.amazonaws.com"
+        ECR_REPO     = "electronic.ecr"
+        IMAGE_TAG    = "latest"
     }
 
     stages {
-        stage('Test ECR Login') {
+
+        stage('Login to ECR') {
             steps {
                 sh '''
                     aws ecr get-login-password --region ${AWS_REGION} | \
@@ -17,14 +20,40 @@ pipeline {
                 '''
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+                '''
+            }
+        }
+
+        stage('Tag Docker Image') {
+            steps {
+                sh '''
+                    docker tag ${ECR_REPO}:${IMAGE_TAG} \
+                    ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                sh '''
+                    docker push ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo 'ECR login success ✅'
+            echo 'Docker image pushed to ECR successfully ✅'
         }
+
         failure {
-            echo 'ECR login failed ❌'
+            echo 'Pipeline failed ❌'
         }
     }
 }
