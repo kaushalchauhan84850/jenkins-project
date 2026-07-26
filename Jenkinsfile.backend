@@ -6,7 +6,7 @@ pipeline {
     environment {
         AWS_REGION   = 'us-east-1'
         ECR_REGISTRY = '416394563192.dkr.ecr.us-east-1.amazonaws.com'
-        ECR_REPO     = 'electronic-backend'
+        ECR_REPO     = 'electronic.ecr'
         IMAGE_TAG    = 'latest'
     }
 
