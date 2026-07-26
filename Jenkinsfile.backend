@@ -12,45 +12,62 @@ pipeline {
 
     stages {
 
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Verify Environment') {
             steps {
                 sh '''
+                    echo "===== Environment ====="
                     whoami
+                    pwd
                     groups
                     docker --version
                     aws --version
+
+                    echo "===== Repository Structure ====="
+                    ls -la
+                    ls -la backend
                 '''
             }
         }
 
-        stage('Login to ECR') {
+        stage('Login to Amazon ECR') {
             steps {
                 sh '''
                     aws ecr get-login-password --region ${AWS_REGION} | \
-                    sudo docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                    sudo docker login \
+                    --username AWS \
+                    --password-stdin ${ECR_REGISTRY}
                 '''
             }
         }
 
-        stage('Build Image') {
+        stage('Build Docker Image') {
             steps {
-                dir('backend'){
+                dir('backend') {
                     sh '''
-                     sudo docker build -t ${ECR_REPO}:${IMAGE_TAG} .
-                }   '''
+                        sudo docker build \
+                        -t ${ECR_REPO}:${IMAGE_TAG} .
+                    '''
+                }
             }
         }
 
-        stage('Tag Image') {
+        stage('Tag Docker Image') {
             steps {
                 sh '''
-                    sudo docker tag ${ECR_REPO}:${IMAGE_TAG} \
+                    sudo docker tag \
+                    ${ECR_REPO}:${IMAGE_TAG} \
                     ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
                 '''
             }
         }
 
-        stage('Push Image') {
+        stage('Push Docker Image') {
             steps {
                 sh '''
                     sudo docker push \
@@ -70,11 +87,15 @@ pipeline {
 
     post {
         success {
-            echo '✅ Docker image pushed successfully!'
+            echo '✅ Docker image built and pushed to Amazon ECR successfully!'
         }
 
         failure {
             echo '❌ Pipeline failed.'
+        }
+
+        always {
+            cleanWs()
         }
     }
 }
