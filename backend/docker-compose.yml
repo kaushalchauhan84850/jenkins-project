@@ -1,0 +1,8 @@
+services:
+  backend:
+    image: 416394563192.dkr.ecr.us-east-1.amazonaws.com/electronic.ecr:latest
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    restart: unless-stopped
