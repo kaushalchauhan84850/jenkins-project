@@ -4,44 +4,64 @@ pipeline {
     }
 
     environment {
-        AWS_REGION   = "us-east-1"
-        ECR_REGISTRY = "416394563192.dkr.ecr.us-east-1.amazonaws.com"
-        ECR_REPO     = "electronic.ecr"
-        IMAGE_TAG    = "latest"
+        AWS_REGION   = 'us-east-1'
+        ECR_REGISTRY = '416394563192.dkr.ecr.us-east-1.amazonaws.com'
+        ECR_REPO     = 'electronic-backend'
+        IMAGE_TAG    = 'latest'
     }
 
     stages {
+
+        stage('Verify Environment') {
+            steps {
+                sh '''
+                    whoami
+                    groups
+                    docker --version
+                    aws --version
+                '''
+            }
+        }
 
         stage('Login to ECR') {
             steps {
                 sh '''
                     aws ecr get-login-password --region ${AWS_REGION} | \
-                    docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                    sudo docker login --username AWS --password-stdin ${ECR_REGISTRY}
                 '''
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Image') {
             steps {
                 sh '''
-                    docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+                    sudo docker build -t ${ECR_REPO}:${IMAGE_TAG} .
                 '''
             }
         }
 
-        stage('Tag Docker Image') {
+        stage('Tag Image') {
             steps {
                 sh '''
-                    docker tag ${ECR_REPO}:${IMAGE_TAG} \
+                    sudo docker tag ${ECR_REPO}:${IMAGE_TAG} \
                     ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
                 '''
             }
         }
 
-        stage('Push to ECR') {
+        stage('Push Image') {
             steps {
                 sh '''
-                    docker push ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                    sudo docker push \
+                    ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                sh '''
+                    sudo docker image prune -f
                 '''
             }
         }
@@ -49,11 +69,11 @@ pipeline {
 
     post {
         success {
-            echo 'Docker image pushed to ECR successfully ✅'
+            echo '✅ Docker image pushed successfully!'
         }
 
         failure {
-            echo 'Pipeline failed ❌'
+            echo '❌ Pipeline failed.'
         }
     }
 }
